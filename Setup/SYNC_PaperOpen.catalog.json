@@ -1,12 +1,12 @@
 [
     {
-        "id":  "VRAMWIZ.SYNC_WeatherFX",
-        "name":  "天気演出",
+        "id":  "VRAMWIZ.SYNC_PaperOpen",
+        "name":  "開封演出",
         "type":  "フィルタプラグイン",
-        "summary":  "14種類の天気プリセット。空・雲・太陽・月・虹・雨・雪・雷・霧・星を組み合わせ、時刻と風で変化する天候を演出",
-        "description":  "https://raw.githubusercontent.com/vramwiz/SYNC_WeatherFX/refs/heads/main/README.md",
+        "summary":  "封筒から紙を取り出して展開する映像演出。画像を使った12種類のプリセットと、入れ物・開封・折り方の個別設定に対応。",
+        "description":  "https://raw.githubusercontent.com/vramwiz/SYNC_PaperOpen/refs/heads/main/README.md",
         "author":  "VRAMの魔術師",
-        "repoURL":  "https://github.com/vramwiz/SYNC_WeatherFX/",
+        "repoURL":  "https://github.com/vramwiz/SYNC_PaperOpen/",
         "licenses":  [
                          {
                              "type":  "GPL-3.0",
@@ -21,8 +21,8 @@
                          }
                      ],
         "tags":  [
-                     "天気",
-                     "空",
+                     "紙",
+                     "封筒",
                      "映像演出"
                  ],
         "dependencies":  [
@@ -36,8 +36,8 @@
                                          "direct":  null,
                                          "github":  {
                                                         "owner":  "vramwiz",
-                                                        "repo":  "SYNC_WeatherFX",
-                                                        "pattern":  "^SYNC_WeatherFX\\.zip$"
+                                                        "repo":  "SYNC_PaperOpen",
+                                                        "pattern":  "^SYNC_PaperOpen\\.zip$"
                                                     }
                                      },
                           "install":  [
@@ -49,41 +49,41 @@
                                           },
                                           {
                                               "action":  "copy",
-                                              "from":  "{tmp}/SYNC_WeatherFX",
-                                              "to":  "{pluginsDir}/SYNC_WeatherFX"
+                                              "from":  "{tmp}/SYNC_PaperOpen",
+                                              "to":  "{pluginsDir}/SYNC_PaperOpen"
                                           }
                                       ],
                           "uninstall":  [
                                             {
                                                 "action":  "delete",
-                                                "path":  "{pluginsDir}/SYNC_WeatherFX/SYNC_WeatherFX.auf2"
+                                                "path":  "{pluginsDir}/SYNC_PaperOpen/SYNC_PaperOpen.auf2"
                                             },
                                             {
                                                 "action":  "delete",
-                                                "path":  "{pluginsDir}/SYNC_WeatherFX/README.md"
+                                                "path":  "{pluginsDir}/SYNC_PaperOpen/README.md"
                                             },
                                             {
                                                 "action":  "delete",
-                                                "path":  "{pluginsDir}/SYNC_WeatherFX/LICENSE"
+                                                "path":  "{pluginsDir}/SYNC_PaperOpen/LICENSE"
                                             },
                                             {
                                                 "action":  "delete",
-                                                "path":  "{pluginsDir}/SYNC_WeatherFX/THIRD_PARTY_NOTICES.md"
+                                                "path":  "{pluginsDir}/SYNC_PaperOpen/THIRD_PARTY_NOTICES.md"
                                             },
                                             {
                                                 "action":  "delete",
-                                                "path":  "{pluginsDir}/SYNC_WeatherFX/ThirdParty/LICENSE.AviUtl2-SDK.txt"
+                                                "path":  "{pluginsDir}/SYNC_PaperOpen/ThirdParty/LICENSE.AviUtl2-SDK.txt"
                                             }
                                         ]
                       },
         "version":  [
                         {
                             "version":  "v1.0.0",
-                            "release_date":  "2026-11-18",
+                            "release_date":  "2026-11-25",
                             "file":  [
                                          {
-                                             "path":  "{pluginsDir}/SYNC_WeatherFX/SYNC_WeatherFX.auf2",
-                                             "XXH3_128":  "4ab1b3c1d16ab23a63ba5822475d3fae"
+                                             "path":  "{pluginsDir}/SYNC_PaperOpen/SYNC_PaperOpen.auf2",
+                                             "XXH3_128":  "ee6749b9d2ab49155bb059b5caf7a9c3"
                                          }
                                      ]
                         }

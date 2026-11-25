@@ -28,7 +28,7 @@ const
   PresetNames: array[0..PRESET_COUNT-1] of PWideChar = (
     '横長封筒の手紙', '縦長封筒の手紙', '封蝋付きの手紙', '招待状', '極秘書類',
     '箱に入った書類', '紙袋に入った書類', '宝の地図', '巻物', '折りたたまれた新聞',
-    'くしゃくしゃの紙', '紙飛行機', '舞い降りる紙');
+    'くしゃくしゃの紙', '舞い降りる紙');
   ContainerNames: array[TContainerKind] of PWideChar = ('なし', '横長封筒',
     '縦長封筒', '正方形封筒', '封蝋付き封筒', '紙袋', '箱', '筒状ケース',
     'ユーザー指定画像');
@@ -38,7 +38,7 @@ const
   FoldNames: array[TFoldKind] of PWideChar = ('折りたたみなし', '二つ折り（縦）',
     '二つ折り（横）', '三つ折り（縦）', '三つ折り（横）', '四つ折り', '蛇腹折り',
     '八つ折り', '巻物を広げる', '丸めた紙を広げる', 'くしゃくしゃの紙を広げる',
-    '紙飛行機から展開する', '裏返しの紙をめくる');
+    '裏返しの紙をめくる');
   EntranceNames: array[TEntranceKind] of PWideChar = ('最初から表示',
     'フェードイン', '上から登場', '下から登場', '左から登場', '右から登場',
     '舞い降りる', '飛来する');
@@ -58,7 +58,8 @@ var
   Tracks: array[TPhase] of TFILTER_ITEM_TRACK;
   Creases: TFILTER_ITEM_TRACK;
   BaseColor, AccentColor: TFILTER_ITEM_COLOR;
-  PaperPath, ContainerPath: TFILTER_ITEM_FILE;
+  PaperPath, ContainerPath, LegacyPaperPath, LegacyContainerPath: TFILTER_ITEM_FILE;
+  ContainerPathVisibility, LegacyPaperVisibility, LegacyContainerVisibility: TFILTER_ITEM_HIDE_RULE;
   ApplyButton: TFILTER_ITEM_BUTTON;
   Groups, GroupEnds: array[0..4] of TFILTER_ITEM_GROUP;
 
@@ -155,12 +156,14 @@ var
 begin
   S := PaperPreset(0);
   AddOptions(sePreset, 0, PresetNames);
-  AddButton(ApplyButton, '設定を反映', ApplyPreset);
-  AddFile(PaperPath, '紙の画像ファイル', '', IMAGE_FILTER);
+  AddButton(ApplyButton, '適用', ApplyPreset);
+  AddFile(PaperPath, '紙画像', '', IMAGE_FILTER);
 
   AddGroup(Groups[0], '入れ物・開封', 1);
   AddOptions(seContainer, Ord(S.Container), ContainerNames);
-  AddFile(ContainerPath, '入れ物の画像ファイル', '', IMAGE_FILTER);
+  AddFile(ContainerPath, '容器画像', '', IMAGE_FILTER);
+  AddHideRule(ContainerPathVisibility, ContainerPath.Name, Names[seContainer],
+    FILTER_HIDE_NOT_EQUAL, Ord(ckImage));
   AddOptions(seOpening, Ord(S.Opening), OpeningNames);
   Track(phOpening);
   AddGroup(GroupEnds[0], '', 0);
@@ -187,6 +190,12 @@ begin
   Color(BaseColor, '基本色', S.BaseColor);
   Color(AccentColor, 'アクセント色', S.AccentColor);
   AddGroup(GroupEnds[4], '', 0);
+
+  // 既存プロジェクトの保存キーを読み込めるよう、旧ファイル項目を非表示で登録する。
+  AddFile(LegacyPaperPath, '紙の画像ファイル', '', IMAGE_FILTER);
+  AddAlwaysHideRule(LegacyPaperVisibility, LegacyPaperPath.Name);
+  AddFile(LegacyContainerPath, '入れ物の画像ファイル', '', IMAGE_FILTER);
+  AddAlwaysHideRule(LegacyContainerVisibility, LegacyContainerPath.Name);
 end;
 
 procedure ReadPaperOpenParameters(out S: TPaperSettings; out PaperFile, ContainerFile: string);
@@ -205,7 +214,17 @@ begin
   for Phase := Low(TPhase) to High(TPhase) do
     S.Seconds[Phase] := Bounded(Tracks[Phase].Value, MAX_SECONDS);
   PaperFile := PaperPath.Value;
-  ContainerFile := ContainerPath.Value;
+  if PaperFile = '' then PaperFile := LegacyPaperPath.Value;
+
+  ContainerFile := '';
+  if S.Container = ckImage then
+  begin
+    ContainerFile := ContainerPath.Value;
+    if ContainerFile = '' then ContainerFile := LegacyContainerPath.Value;
+  end
+  else if PaperFile = '' then
+    // 旧版の標準容器で、使われない容器欄だけに選んだ画像を紙として復元する。
+    PaperFile := LegacyContainerPath.Value;
 end;
 
 end.

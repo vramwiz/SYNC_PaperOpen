@@ -15,6 +15,6 @@ Win32/
 *.auf2
 *.rsm
 *.drc
-setup/*.zip
-setup/.release-*
-!setup/make_release_zip.bat
+Setup/*.zip
+Setup/.release-*
+!Setup/make_release_zip.bat

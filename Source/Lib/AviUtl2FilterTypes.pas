@@ -195,7 +195,7 @@ type
     List    : ^TFILTER_ITEM_SELECT_ITEM; // nil終端された選択肢配列。
   end;
 
-  // AviUtl2 v2.1.16で条件名nilを指定すると、対象項目を常に隠す。
+  // 条件成立時に対象項目を隠す。条件名nilは常時非表示。
   TFILTER_ITEM_HIDE_RULE = record
     ItemType: LPCWSTR;
     Name: LPCWSTR;
@@ -244,6 +244,7 @@ type
   end;
 
 const
+  FILTER_HIDE_NOT_EQUAL = 1;
   OBJECT_FLAG_FILTER_OBJECT = 1;
   FILTER_FLAG_VIDEO = 1;
   FILTER_FLAG_INPUT = 4; // 公式SDK: メディアオブジェクトの初期画像を生成する。

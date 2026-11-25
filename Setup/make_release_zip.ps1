@@ -3,24 +3,24 @@
     [string]$XxhsumPath
 )
 
-# SYNC_AquaFX/setupを継承。既存のWeatherFX本番AUF2を梱包し、末尾バージョンのハッシュを更新する。
+# SYNC_AquaFX/setupを継承。既存のPaperOpen本番AUF2を梱包し、末尾バージョンのハッシュを更新する。
 # ビルド・ホスト起動・ネットワークへの公開は行わない。
 # Copyright (c) 2026 VRAMの魔術師 / SPDX-License-Identifier: GPL-3.0-only
 $ErrorActionPreference = 'Stop'
-$packageName = 'SYNC_WeatherFX'
+$packageName = 'SYNC_PaperOpen'
 $projectDir = Split-Path -Parent $PSScriptRoot
 if (-not $ReleaseDirectory) { $ReleaseDirectory = Join-Path $env:ProgramData "aviutl2\Plugin\$packageName" }
 $pluginName = "$packageName.auf2"
 $pluginPath = Join-Path $ReleaseDirectory $pluginName
 if (-not (Test-Path -LiteralPath $pluginPath -PathType Leaf)) {
-    throw "Release plugin not found: $pluginPath. Build the Win64 Release configuration first."
+    throw "Release plugin not found: $pluginPath. Specify the folder containing the release AUF2."
 }
 
 if (-not $XxhsumPath) {
     $XxhsumPath = Join-Path $projectDir 'Win64\Dependencies\xxHash-0.8.4\xxhsum.exe'
     if (-not (Test-Path -LiteralPath $XxhsumPath -PathType Leaf)) {
         $xxhsum = Get-Command xxhsum.exe -CommandType Application -ErrorAction SilentlyContinue
-        if (-not $xxhsum) { throw 'xxhsum.exe is required. See setup\README.md.' }
+        if (-not $xxhsum) { throw 'xxhsum.exe is required. See Setup\README.md.' }
         $XxhsumPath = $xxhsum.Source
     }
 }
@@ -37,7 +37,7 @@ $tempReadme = "$tempBase-readme.tmp"
 $catalogBackup = "$tempBase-previous-catalog.tmp"
 
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
-$lock = [Threading.Mutex]::new($false, 'Local\VRAMWIZ.SYNC_WeatherFX.ReleaseZip')
+$lock = [Threading.Mutex]::new($false, 'Local\VRAMWIZ.SYNC_PaperOpen.ReleaseZip')
 $ownsLock = $false
 try {
     try { $ownsLock = $lock.WaitOne(0) }
@@ -64,7 +64,7 @@ try {
     }
     if (@($entry.version).Count -eq 0) { throw 'The catalog must contain a release version.' }
     if ($entry.version[0].version -cne 'v1.0.0') {
-        throw 'The first public WeatherFX version must be v1.0.0.'
+        throw 'The first public PaperOpen version must be v1.0.0.'
     }
     $version = $catalog[0].version[-1]
     $releaseDate = [datetime]::MinValue

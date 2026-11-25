@@ -2,7 +2,7 @@
   SHADER_SOURCE: AnsiString =
     'cbuffer Frame : register(b0) {'#10 +
     '  float2 pixelToClip; float depthScale; float crease;'#10 +
-    '  float2 folds; float foldStyle; float softness;'#10 +
+    '  float2 folds; float foldStyle; float printExposure;'#10 +
     '};'#10 +
     'Texture2D<float4> paperTex : register(t0);'#10 +
     'Texture2D<float4> caseTex : register(t1);'#10 +
@@ -25,7 +25,7 @@
     'float foldLine(float t, float n) {'#10 +
     '  float x = t * n; float closest = round(x);'#10 +
     '  if (closest < 1 || closest >= n) return 0;'#10 +
-    '  float d = (x - closest) / max(fwidth(x), n * softness);'#10 +
+    '  float d = (x - closest) / max(fwidth(x), n * .0005);'#10 +
     '  return -0.23 * exp(-d*d*.55) + 0.11 * exp(-pow(abs(d-1.6),2)*.7);'#10 +
     '}'#10 +
     'float4 MeshPS(Fragment f, bool front : SV_IsFrontFace) : SV_Target {'#10 +
@@ -33,18 +33,19 @@
     '  if (f.material > 1.5) return caseTex.Sample(linearClamp, f.uv) * f.color.a;'#10 +
     '  if (f.material < .5) return c;'#10 +
     '  float4 image = paperTex.Sample(linearClamp, f.uv);'#10 +
-    '  clip(image.a * c.a - .001);'#10 +
-    '  c = (front ? image : float4(f.color.rgb * image.a, image.a)) * f.color.a;'#10 +
+    '  float4 surface = lerp(float4(f.color.rgb, 1), image, printExposure);'#10 +
+    '  clip(surface.a * c.a - .001);'#10 +
+    '  if (!front) surface.rgb = f.color.rgb * surface.a;'#10 +
+    '  c = surface * f.color.a;'#10 +
     '  float mark = 0;'#10 +
-    '  if (crease > 0) {'#10 +
+    '  if (crease * printExposure > 0) {'#10 +
     '    mark = foldLine(f.uv.x, folds.x) + foldLine(f.uv.y, folds.y);'#10 +
     '    if (foldStyle == 10) {'#10 +
     '      mark += .54 * foldLine(.5 * (f.uv.x + f.uv.y), 7);'#10 +
     '      mark += .45 * foldLine(.5 + .5 * (f.uv.x - f.uv.y), 9);'#10 +
     '    }'#10 +
-    '    if (foldStyle == 11) mark += foldLine(.5 * (f.uv.y + abs(f.uv.x-.5)), 3);'#10 +
     '  }'#10 +
-    '  float light = f.light + crease * mark;'#10 +
+    '  float light = f.light + crease * printExposure * mark;'#10 +
     '  return float4(min(c.rgb * light, c.a), c.a);'#10 +
     '}'#10 +
     'float4 CopyVS(uint i : SV_VertexID) : SV_Position {'#10 +

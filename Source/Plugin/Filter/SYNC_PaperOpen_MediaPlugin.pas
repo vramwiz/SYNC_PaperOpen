@@ -141,7 +141,8 @@ begin
     end;
     if Frame.ContainerVisible and Frame.Occluded then AddContainer(True);
 
-    if FD3D.Render(Video, FMesh, FMesh.Canvas(ImageW, ImageH), Ranges, S, FPaper, Custom) then
+    if FD3D.Render(Video, FMesh, FMesh.Canvas(ImageW, ImageH), Ranges, S,
+      Frame.Unfold, FPaper, Custom) then
       Result := 1;
   finally
     FLock.Release;

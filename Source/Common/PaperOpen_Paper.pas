@@ -31,7 +31,6 @@ begin
     fkQuarter: begin Columns := 2; Rows := 2 end;
     fkAccordion: Columns := 6;
     fkEighth: begin Columns := 2; Rows := 4 end;
-    fkPlane: begin Columns := 4; Rows := 4 end;
   end;
 end;
 
@@ -142,16 +141,6 @@ begin
         Result.Z := Warp * (0.11 * Sin(24 * U + 17 * V) +
           0.06 * Cos(34 * U - 28 * V) + 0.09 * Cos(7 * (U - V)));
       end;
-    fkPlane:
-      begin
-        // 背筋と斜めの翼を持つ形。UVの左右を対称に折って前端を絞る。
-        A := Folded * (0.42 + 0.78 * (1 - V));
-        SinCos(A, S, C);
-        Result.X := X * C * (1 - Folded * 0.98 * (1 - V));
-        Result.Y := Y * (1 - 0.26 * Folded) +
-          Abs(U - 0.5) * H * Folded * (0.18 - 0.50 * V);
-        Result.Z := -Abs(X) * S * 0.80;
-      end;
     fkTurn:
       begin
         A := Pi * Folded + Sin(Pi * U) * Sin(Pi * Folded) * 0.52;
@@ -201,7 +190,6 @@ begin
     case S.Fold of
       fkScroll, fkRoll: NY := 40;
       fkCrumple: begin NX := 24; NY := 24 end;
-      fkPlane: begin NX := 16; NY := 16 end;
       fkTurn: begin NX := 20; NY := 10 end;
     end
   else

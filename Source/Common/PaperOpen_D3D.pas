@@ -51,13 +51,13 @@ type
     procedure Upload(Image: TPaperImage; var Cache: TUploadedImage);
     procedure Draw(const Target: ID3D11Texture2D; const Canvas: TCanvas;
       Mesh: TPaperMesh; const Ranges: array of TDrawRange;
-      const Settings: TPaperSettings);
+      const Settings: TPaperSettings; Unfold: Single);
     procedure SendReadback(Video: PFILTER_PROC_VIDEO; const Canvas: TCanvas);
   public
     // Render 中に画像の寸法を確保する。true の場合はホストの標準描画を続ける。
     function Render(Video: PFILTER_PROC_VIDEO; Mesh: TPaperMesh; const Canvas: TCanvas;
       const Ranges: array of TDrawRange; const S: TPaperSettings;
-      Paper, Container: TPaperImage): Boolean;
+      Unfold: Single; Paper, Container: TPaperImage): Boolean;
   end;
 
 implementation
@@ -69,7 +69,7 @@ uses System.SysUtils, System.Math, System.SyncObjs, Winapi.Windows,
 
 type
   TUniforms = record
-    ScaleX, ScaleY, Depth, Crease, FoldsX, FoldsY, Kind, Softness: Single;
+    ScaleX, ScaleY, Depth, Crease, FoldsX, FoldsY, Kind, PrintExposure: Single;
   end;
 
 const
@@ -417,7 +417,8 @@ begin
 end;
 
 procedure TPaperD3D.Draw(const Target: ID3D11Texture2D; const Canvas: TCanvas;
-  Mesh: TPaperMesh; const Ranges: array of TDrawRange; const Settings: TPaperSettings);
+  Mesh: TPaperMesh; const Ranges: array of TDrawRange; const Settings: TPaperSettings;
+  Unfold: Single);
 var
   W, H, I, X, Y: Integer;
   Stride, Offset: Cardinal;
@@ -466,7 +467,8 @@ begin
   Constants.ScaleY := -2 / H;
   Constants.Depth := 0.47 / Mesh.Depth;
   Constants.Kind := Ord(Settings.Fold);
-  Constants.Softness := 0.0005;
+  // 折り切った紙の外側は地色で覆い、展開に合わせて表側の印刷面を出す。
+  Constants.PrintExposure := Smooth(EnsureRange((Unfold - 0.10) / 0.58, 0, 1));
   FoldDivisions(Settings.Fold, X, Y);
   if Settings.Fold in [fkScroll, fkRoll] then Y := 4;
   if Settings.Fold = fkTurn then X := 2;
@@ -582,7 +584,7 @@ end;
 
 function TPaperD3D.Render(Video: PFILTER_PROC_VIDEO; Mesh: TPaperMesh;
   const Canvas: TCanvas; const Ranges: array of TDrawRange; const S: TPaperSettings;
-  Paper, Container: TPaperImage): Boolean;
+  Unfold: Single; Paper, Container: TPaperImage): Boolean;
 var
   Image: ID3D11Texture2D;
   Device: ID3D11Device;
@@ -603,7 +605,7 @@ begin
         MakePipeline;
         Upload(Paper, FPaper);
         Upload(Container, FCase);
-        Draw(Image, Canvas, Mesh, Ranges, S);
+        Draw(Image, Canvas, Mesh, Ranges, S, Unfold);
         Exit(True);
       except
         on E: Exception do
@@ -622,7 +624,7 @@ begin
     MakePipeline;
     Upload(Paper, FPaper);
     Upload(Container, FCase);
-    Draw(nil, Canvas, Mesh, Ranges, S);
+    Draw(nil, Canvas, Mesh, Ranges, S, Unfold);
     SendReadback(Video, Canvas);
     Result := True;
   except

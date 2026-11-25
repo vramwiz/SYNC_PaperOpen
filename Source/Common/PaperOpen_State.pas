@@ -11,7 +11,7 @@ type
     ckTube, ckImage);
   TOpeningKind = (okNone, okTop, okSide, okLid, okCut, okTie, okPull);
   TFoldKind = (fkNone, fkHalfV, fkHalfH, fkThirdV, fkThirdH, fkQuarter,
-    fkAccordion, fkEighth, fkScroll, fkRoll, fkCrumple, fkPlane, fkTurn);
+    fkAccordion, fkEighth, fkScroll, fkRoll, fkCrumple, fkTurn);
   TEntranceKind = (enStatic, enFade, enTop, enBottom, enLeft, enRight,
     enFloat, enFly);
   TDirection = (diAuto, diUp, diDown, diLeft, diRight);
@@ -36,7 +36,7 @@ type
   end;
 
 const
-  PRESET_COUNT = 13;
+  PRESET_COUNT = 12;
   MAX_SECONDS = 60;
 
 function PaperPreset(Index: Integer): TPaperSettings;
@@ -70,6 +70,7 @@ begin
   for Phase := Low(TPhase) to High(TPhase) do
     Result.Seconds[Phase] := 1;
   case Index of
+    0: Result.Entrance := enStatic;
     1:
       begin
         Result.Container := ckTall;
@@ -159,15 +160,6 @@ begin
         Result.Seconds[phUnfold] := 1.2;
       end;
     11:
-      begin
-        Result.Container := ckNone;
-        Result.Opening := okNone;
-        Result.Fold := fkPlane;
-        Result.Entrance := enFly;
-        Result.Crease := 0.12;
-        Result.Seconds[phEntrance] := 1.4;
-      end;
-    12:
       begin
         Result.Container := ckNone;
         Result.Opening := okNone;
