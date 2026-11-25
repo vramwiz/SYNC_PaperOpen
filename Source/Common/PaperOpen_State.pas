@@ -28,6 +28,7 @@ type
     BaseColor, AccentColor: Cardinal; // RGB
     Seconds: array[TPhase] of Double;
     Crease: Double; // 0..1
+    ContainerScale: Single; // 1 = 100%
   end;
 
   TPaperFrame = record
@@ -67,6 +68,7 @@ begin
   Result.Leaving := exFade;
   Result.BaseColor := $F0DFBC;
   Result.AccentColor := $AE5545;
+  Result.ContainerScale := 1;
   for Phase := Low(TPhase) to High(TPhase) do
     Result.Seconds[Phase] := 1;
   case Index of

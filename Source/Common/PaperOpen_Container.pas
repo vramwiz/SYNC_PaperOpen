@@ -11,14 +11,14 @@ uses PaperOpen_State, PaperOpen_Geometry;
 type
   TContainerLayout = record
     Pose: TPose;
-    W, H, DX, DY, Opening, ImageW, ImageH: Single;
+    W, H, DX, DY, Opening: Single;
     Kind: TContainerKind;
     Method: TOpeningKind;
     Base, Accent: Cardinal;
   end;
 
 procedure PlaceScene(const S: TPaperSettings; const F: TPaperFrame;
-  PaperW, PaperH, FoldedW, FoldedH, ImageW, ImageH: Single;
+  PaperW, PaperH, FoldedW, FoldedH, ContainerImageW, ContainerImageH: Single;
   out Paper: TPose; out Container: TContainerLayout);
 procedure DrawContainer(Mesh: TPaperMesh; const C: TContainerLayout;
   Front: Boolean);
@@ -27,42 +27,35 @@ implementation
 
 uses System.Math;
 
-procedure ContainerSize(Kind: TContainerKind; FoldedW, FoldedH, ImageW,
-  ImageH: Single; out W, H: Single);
+procedure ContainerSize(Kind: TContainerKind; Scale, ImageW, ImageH: Single;
+  out W, H: Single);
 var
-  Fit: Single;
+  LongSide: Single;
 begin
-  W := Max(FoldedW * 1.15, FoldedW + 2);
-  H := Max(FoldedH * 1.22, FoldedH + 2);
+  // 100%の基準寸法（px）。容器画像は縦横比を保ち、長辺を640pxに揃える。
   case Kind of
-    ckWide, ckWax: W := Max(W, H * 1.65);
-    ckTall:
-      begin
-        H := Max(H, W * 1.40);
-        W := Max(W, H * 0.45);
-      end;
-    ckSquare: begin W := Max(W, H); H := W end;
-    ckBag:
-      begin
-        H := Max(H * 1.15, W * 0.72);
-        W := Max(W, H * 0.62);
-      end;
-    ckBox: begin W := W * 1.12; H := H * 1.12 end;
-    ckTube: H := H * 1.08;
+    ckWide, ckWax: begin W := 640; H := 320 end;
+    ckTall: begin W := 320; H := 640 end;
+    ckSquare: begin W := 480; H := 480 end;
+    ckBag: begin W := 480; H := 560 end;
+    ckBox: begin W := 640; H := 400 end;
+    ckTube: begin W := 640; H := 240 end;
     ckImage:
-      if (ImageW > 0) and (ImageH > 0) then
       begin
-        Fit := Max(W / ImageW, H / ImageH);
-        // 細長い素材の極端な拡大を抑え、素材の縦横比は常に維持する。
-        Fit := Min(Fit, 3.5 * Max(W, H) / Max(ImageW, ImageH));
-        W := ImageW * Fit;
-        H := ImageH * Fit;
+        LongSide := Max(1, Max(ImageW, ImageH));
+        W := 640 * ImageW / LongSide;
+        H := 640 * ImageH / LongSide;
       end;
+  else
+    W := 0;
+    H := 0;
   end;
+  W := W * Scale;
+  H := H * Scale;
 end;
 
 procedure PlaceScene(const S: TPaperSettings; const F: TPaperFrame;
-  PaperW, PaperH, FoldedW, FoldedH, ImageW, ImageH: Single;
+  PaperW, PaperH, FoldedW, FoldedH, ContainerImageW, ContainerImageH: Single;
   out Paper: TPose; out Container: TContainerLayout);
 var
   W, H, DX, DY, Clearance, Span, P, Offset, Tip, DrawBack: Single;
@@ -80,20 +73,16 @@ begin
 
   DirectionVector(PaperDirection(S), DX, DY);
   Sideways := DX <> 0;
-  ContainerSize(S.Container, FoldedW, FoldedH, ImageW, ImageH, W, H);
+  ContainerSize(S.Container, S.ContainerScale, ContainerImageW, ContainerImageH, W, H);
   if Sideways then
   begin
     Container.W := H;
     Container.H := W;
-    Container.ImageW := ImageH;
-    Container.ImageH := ImageW;
   end
   else
   begin
     Container.W := W;
     Container.H := H;
-    Container.ImageW := ImageW;
-    Container.ImageH := ImageH;
   end;
   Container.DX := DX;
   Container.DY := DY;

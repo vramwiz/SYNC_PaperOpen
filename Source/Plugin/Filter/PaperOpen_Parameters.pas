@@ -46,6 +46,8 @@ const
   ExitNames: array[TExitKind] of PWideChar = ('そのまま残す', '即時消去',
     'フェードアウト', '下方向へ落下', '上方向へ移動', '左方向へ移動',
     '右方向へ移動', '縮小消失');
+  MIN_CONTAINER_PERCENT = 10;
+  MAX_CONTAINER_PERCENT = 1000;
   IMAGE_FILTER: PWideChar =
     '画像ファイル (*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff;*.webp;*.ico)'#0 +
     '*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff;*.webp;*.ico'#0 +
@@ -56,7 +58,7 @@ var
   Options: array[TSelector, 0..PRESET_COUNT] of TFILTER_ITEM_SELECT_ITEM;
   OptionCounts: array[TSelector] of Integer;
   Tracks: array[TPhase] of TFILTER_ITEM_TRACK;
-  Creases: TFILTER_ITEM_TRACK;
+  Creases, ContainerScale: TFILTER_ITEM_TRACK;
   BaseColor, AccentColor: TFILTER_ITEM_COLOR;
   PaperPath, ContainerPath, LegacyPaperPath, LegacyContainerPath: TFILTER_ITEM_FILE;
   ContainerPathVisibility, LegacyPaperVisibility, LegacyContainerVisibility: TFILTER_ITEM_HIDE_RULE;
@@ -161,6 +163,9 @@ begin
 
   AddGroup(Groups[0], '入れ物・開封', 1);
   AddOptions(seContainer, Ord(S.Container), ContainerNames);
+  // 既存プロジェクトの保存値を共通の拡大率として読み込むため、項目名を保持する。
+  AddTrack(ContainerScale, '封筒の拡大率', S.ContainerScale * 100,
+    MIN_CONTAINER_PERCENT, MAX_CONTAINER_PERCENT, 0.1);
   AddFile(ContainerPath, '容器画像', '', IMAGE_FILTER);
   AddHideRule(ContainerPathVisibility, ContainerPath.Name, Names[seContainer],
     FILTER_HIDE_NOT_EQUAL, Ord(ckImage));
@@ -211,6 +216,8 @@ begin
   S.BaseColor := RGB(BaseColor);
   S.AccentColor := RGB(AccentColor);
   S.Crease := Bounded(Creases.Value, 100) / 100;
+  S.ContainerScale := Max(MIN_CONTAINER_PERCENT,
+    Bounded(ContainerScale.Value, MAX_CONTAINER_PERCENT)) / 100;
   for Phase := Low(TPhase) to High(TPhase) do
     S.Seconds[Phase] := Bounded(Tracks[Phase].Value, MAX_SECONDS);
   PaperFile := PaperPath.Value;
