@@ -3,7 +3,7 @@
         "id":  "VRAMWIZ.SYNC_PaperOpen",
         "name":  "開封演出",
         "type":  "フィルタプラグイン",
-        "summary":  "封筒から紙を取り出して展開する映像演出。画像を使った12種類のプリセットと、入れ物・開封・折り方の個別設定に対応。",
+        "summary":  "封筒から紙を取り出して展開。画像や開き方を選べる",
         "description":  "https://raw.githubusercontent.com/vramwiz/SYNC_PaperOpen/refs/heads/main/README.md",
         "author":  "VRAMの魔術師",
         "repoURL":  "https://github.com/vramwiz/SYNC_PaperOpen/",
